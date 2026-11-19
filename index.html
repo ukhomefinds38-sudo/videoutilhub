@@ -220,6 +220,39 @@ function showThumbnail(){
  box.appendChild(img);
 }
 </script>
+<section id="aspect-calculator" style="padding:25px; margin:25px auto; max-width:600px; background:#182235; border-radius:15px; color:white; text-align:center;">
+  <h2>Video Aspect Ratio Calculator</h2>
+  <p>Enter video width and height to calculate its aspect ratio.</p>
 
+  <input id="videoWidth" type="number" placeholder="Width (e.g. 1920)" value="1920" style="padding:12px; width:40%; margin:5px;">
+  <input id="videoHeight" type="number" placeholder="Height (e.g. 1080)" value="1080" style="padding:12px; width:40%; margin:5px;">
+
+  <br><br>
+  <button onclick="calculateRatio()" style="padding:12px 25px; background:#2563eb; color:white; border:0; border-radius:8px;">
+    Calculate Ratio
+  </button>
+
+  <h3 id="ratioResult">Aspect Ratio: 16:9</h3>
+</section>
+
+<script>
+function calculateRatio() {
+  const w = parseInt(document.getElementById("videoWidth").value);
+  const h = parseInt(document.getElementById("videoHeight").value);
+
+  if (!w || !h || w < 1 || h < 1) {
+    document.getElementById("ratioResult").textContent = "Please enter valid numbers.";
+    return;
+  }
+
+  function gcd(a, b) {
+    return b === 0 ? a : gcd(b, a % b);
+  }
+
+  const divisor = gcd(w, h);
+  document.getElementById("ratioResult").textContent =
+    "Aspect Ratio: " + (w / divisor) + ":" + (h / divisor);
+}
+</script>
 </body>
 </html>

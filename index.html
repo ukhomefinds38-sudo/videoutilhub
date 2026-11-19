@@ -254,5 +254,36 @@ function calculateRatio() {
     "Aspect Ratio: " + (w / divisor) + ":" + (h / divisor);
 }
 </script>
+<section style="padding:25px; margin:25px auto; max-width:600px; background:#182235; border-radius:15px; color:white; text-align:center;">
+  <h2>Video File Size Calculator</h2>
+  <p>Calculate the approximate size of your video.</p>
+
+  <input id="bitrate" type="number" placeholder="Bitrate (Mbps)" value="5">
+  <br><br>
+  <input id="duration" type="number" placeholder="Duration (minutes)" value="10">
+  <br><br>
+
+  <button onclick="calculateFileSize()" style="padding:12px 25px; background:#2563eb; color:white; border:0; border-radius:8px;">
+    Calculate Size
+  </button>
+
+  <h3 id="fileSizeResult">Estimated Size: 37.5 MB</h3>
+</section>
+
+<script>
+function calculateFileSize() {
+  const bitrate = parseFloat(document.getElementById("bitrate").value);
+  const duration = parseFloat(document.getElementById("duration").value);
+
+  if (!Number.isFinite(bitrate) || !Number.isFinite(duration) || bitrate <= 0 || duration <= 0) {
+    document.getElementById("fileSizeResult").textContent = "Enter valid numbers.";
+    return;
+  }
+
+  const size = (bitrate * duration * 60) / 8;
+  document.getElementById("fileSizeResult").textContent =
+    "Estimated Size: " + size.toFixed(2) + " MB";
+}
+</script>
 </body>
 </html>

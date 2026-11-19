@@ -285,5 +285,38 @@ function calculateFileSize() {
     "Estimated Size: " + size.toFixed(2) + " MB";
 }
 </script>
+<section style="padding:25px; margin:25px auto; max-width:600px; background:#182235; border-radius:15px; color:white; text-align:center;">
+  <h2>Video Duration Converter</h2>
+  <p>Convert seconds into hours, minutes and seconds.</p>
+
+  <input id="videoSeconds" type="number" placeholder="Enter seconds" value="3600">
+
+  <br><br>
+
+  <button onclick="convertDuration()" style="padding:12px 25px; background:#2563eb; color:white; border:0; border-radius:8px;">
+    Convert Duration
+  </button>
+
+  <h3 id="durationResult">1 Hour 0 Minutes 0 Seconds</h3>
+</section>
+
+<script>
+function convertDuration() {
+  const total = Number(document.getElementById("videoSeconds").value);
+
+  if (!Number.isFinite(total) || total < 0 || document.getElementById("videoSeconds").value === "") {
+    document.getElementById("durationResult").textContent = "Enter valid seconds.";
+    return;
+  }
+
+  const seconds = Math.floor(total);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remaining = seconds % 60;
+
+  document.getElementById("durationResult").textContent =
+    hours + " Hours " + minutes + " Minutes " + remaining + " Seconds";
+}
+</script>
 </body>
 </html>

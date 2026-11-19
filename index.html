@@ -1,1 +1,225 @@
-<section id="contact"> <h2>Contact Us</h2> <p>Have a question, suggestion, or feedback?</p> <p>We are always happy to hear from our visitors.</p> <p>Thank you for visiting VideoToolHub!</p> </section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VideoToolHub - Free Online Video Tools</title>
+<meta name="description" content="Free online video tools to preview MP4 videos and view YouTube thumbnails.">
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#081120;color:#f1f5f9;font-family:Arial,sans-serif;line-height:1.6}
+header{text-align:center;background:#111d35;padding:30px 15px}
+header h1{color:#38bdf8;margin:0;font-size:34px}
+header p{color:#cbd5e1}
+nav{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;background:#0e1a30;padding:14px}
+nav a,footer a{color:#38bdf8;text-decoration:none;padding:8px}
+nav a:hover{background:#0284c7;color:white;border-radius:7px}
+.container{max-width:850px;margin:25px auto;padding:15px}
+section{background:#14213a;border:1px solid #293c5c;padding:23px;border-radius:15px;margin-bottom:22px;scroll-margin-top:15px}
+h2{color:#38bdf8;margin-top:0}
+input,textarea{width:100%;padding:14px;margin:10px 0;background:#081120;border:1px solid #435675;border-radius:8px;color:white;font-size:15px}
+button{width:100%;padding:14px;background:#0284c7;border:0;border-radius:8px;color:white;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px}
+button:hover{background:#0369a1}
+button:disabled{opacity:.6}
+video{width:100%;max-height:300px;margin-top:15px;border-radius:10px;background:black}
+.result{text-align:center;margin-top:14px;overflow-wrap:anywhere}
+.progress{height:12px;background:#334155;border-radius:20px;overflow:hidden;margin-top:15px}
+.bar{height:100%;width:0;background:#22c55e;transition:width .2s}
+.note{font-size:13px;color:#b7c5d8}
+footer{text-align:center;padding:25px;color:#94a3b8}
+footer a{display:inline-block}
+</style>
+</head>
+<body>
+
+<header>
+<h1>VideoToolHub</h1>
+<p>Free Online Video Tools</p>
+</header>
+
+<nav>
+<a href="#home">Home</a>
+<a href="#about">About Us</a>
+<a href="#contact">Contact Us</a>
+<a href="#privacy">Privacy Policy</a>
+</nav>
+
+<main class="container">
+
+<section id="home">
+<h2>Welcome to VideoToolHub</h2>
+<p>Your simple destination for useful online video tools.</p>
+<p>Preview direct MP4 videos and view YouTube thumbnails easily.</p>
+</section>
+
+<section id="downloader">
+<h2>🎬 MP4 Video Downloader</h2>
+<p>Paste a direct MP4 video link:</p>
+<input id="mp4" type="url" placeholder="https://example.com/video.mp4">
+<button onclick="previewVideo()">Preview Video</button>
+<div id="videoInfo" class="result"></div>
+<video id="player" controls hidden></video>
+<div class="progress" id="progressBox" hidden>
+<div class="bar" id="bar"></div>
+</div>
+<p id="status" class="result"></p>
+<button id="downloadBtn" onclick="downloadVideo()">Download Video</button>
+<p class="note">Only download videos you own or have permission to download. Direct MP4 links are required. Some servers block downloads.</p>
+</section>
+
+<section id="thumbnail">
+<h2>🖼️ YouTube Thumbnail Viewer</h2>
+<p>Paste a YouTube video link:</p>
+<input id="youtube" placeholder="Paste YouTube link here">
+<button onclick="showThumbnail()">View Thumbnail</button>
+<div id="thumbResult" class="result"></div>
+</section>
+
+<section id="about">
+<h2>About Us</h2>
+<p>Welcome to VideoToolHub. We provide simple and useful online tools to help visitors work with video links and thumbnails.</p>
+<p>Our goal is to make online video tools easy to understand and use on mobile phones, tablets and computers.</p>
+<p>VideoToolHub is an independent website and is not affiliated with YouTube.</p>
+</section>
+
+<section id="contact">
+<h2>Contact Us</h2>
+<p>Have a question, suggestion, or feedback?</p>
+<p>We are always happy to hear from our visitors.</p>
+<p>Thank you for visiting VideoToolHub!</p>
+</section>
+
+<section id="privacy">
+<h2>Privacy Policy</h2>
+<p><strong>Last updated: November 2026</strong></p>
+<h3>Information We Collect</h3>
+<p>VideoToolHub does not require visitors to create an account. We do not intentionally collect personal information through our video tools.</p>
+<h3>Cookies and Advertising</h3>
+<p>In the future, we may display advertisements from third-party services such as Google AdSense. These services may use cookies or similar technologies according to their own privacy policies.</p>
+<h3>Third-Party Services</h3>
+<p>Our tools may use services provided by other websites. We are not responsible for the privacy practices of third-party websites.</p>
+<h3>Video Links</h3>
+<p>Please do not submit private or confidential video links. Only use videos you own or have permission to access.</p>
+<h3>Children's Privacy</h3>
+<p>Our website is not intended to knowingly collect personal information from children under 13.</p>
+<h3>Policy Updates</h3>
+<p>We may update this policy when our website or services change.</p>
+<h3>Contact</h3>
+<p>For questions about this policy, please refer to the Contact Us section.</p>
+</section>
+
+</main>
+
+<footer>
+<p>© 2026 VideoToolHub. All rights reserved.</p>
+<a href="#home">Home</a>
+<a href="#about">About</a>
+<a href="#contact">Contact</a>
+<a href="#privacy">Privacy</a>
+</footer>
+
+<script>
+let videoURL="";
+
+function previewVideo(){
+ const link=document.getElementById("mp4").value.trim();
+ const info=document.getElementById("videoInfo");
+ const player=document.getElementById("player");
+ videoURL="";
+ info.textContent="";
+ player.hidden=true;
+ try{
+  const u=new URL(link);
+  if(!["https:","http:"].includes(u.protocol)||!u.pathname.toLowerCase().endsWith(".mp4")){
+   info.textContent="Please enter a direct MP4 link.";
+   return;
+  }
+  videoURL=u.href;
+  player.src=videoURL;
+  player.hidden=false;
+  player.onloadedmetadata=()=>{
+   const d=Math.floor(player.duration);
+   info.textContent="Video ready • "+(Number.isFinite(d)?Math.floor(d/60)+" min "+d%60+" sec":"Duration unavailable");
+  };
+  player.onerror=()=>info.textContent="Preview unavailable. The server may block access.";
+ }catch(e){info.textContent="Please enter a valid link."}
+}
+
+async function downloadVideo(){
+ const link=document.getElementById("mp4").value.trim();
+ const status=document.getElementById("status");
+ const bar=document.getElementById("bar");
+ const box=document.getElementById("progressBox");
+ const btn=document.getElementById("downloadBtn");
+ if(!videoURL||link!==videoURL){previewVideo();if(!videoURL)return}
+ btn.disabled=true;
+ box.hidden=false;
+ bar.style.width="0%";
+ status.textContent="Starting download...";
+ try{
+  const response=await fetch(videoURL);
+  if(!response.ok)throw new Error();
+  const total=Number(response.headers.get("content-length"))||0;
+  if(!response.body)throw new Error();
+  const reader=response.body.getReader();
+  const chunks=[];
+  let loaded=0;
+  while(true){
+   const {done,value}=await reader.read();
+   if(done)break;
+   chunks.push(value);
+   loaded+=value.length;
+   if(total){
+    const p=Math.min(100,Math.round(loaded/total*100));
+    bar.style.width=p+"%";
+    status.textContent="Downloading: "+p+"%";
+   }else status.textContent="Downloading...";
+  }
+  const blob=new Blob(chunks,{type:"video/mp4"});
+  const objectURL=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=objectURL;
+  a.download="VideoToolHub-video.mp4";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(objectURL),60000);
+  bar.style.width="100%";
+  status.textContent="Download complete!";
+ }catch(e){
+  status.textContent="Download blocked by server. Try another direct MP4 link.";
+ }finally{
+  btn.disabled=false;
+ }
+}
+
+function getYouTubeID(url){
+ try{
+  const u=new URL(url);
+  if(u.hostname.includes("youtu.be"))return u.pathname.slice(1).split("/")[0];
+  if(u.hostname.includes("youtube.com")){
+   if(u.pathname==="/watch")return u.searchParams.get("v");
+   const p=u.pathname.split("/");
+   if(["embed","shorts","live"].includes(p[1]))return p[2];
+  }
+ }catch(e){}
+ return null;
+}
+
+function showThumbnail(){
+ const id=getYouTubeID(document.getElementById("youtube").value.trim());
+ const box=document.getElementById("thumbResult");
+ box.innerHTML="";
+ if(!id){box.textContent="Please enter a valid YouTube link.";return}
+ const img=document.createElement("img");
+ img.src="https://img.youtube.com/vi/"+encodeURIComponent(id)+"/hqdefault.jpg";
+ img.style.width="100%";
+ img.style.borderRadius="10px";
+ img.onerror=()=>box.textContent="Thumbnail unavailable.";
+ box.appendChild(img);
+}
+</script>
+
+</body>
+</html>

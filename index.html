@@ -4,41 +4,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VideoToolHub - Free Video Tools</title>
+<title>VideoToolHub - Video Downloader</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;background:#0b1020;color:white;
- font-family:Arial,sans-serif;
-}
-header{text-align:center;padding:28px 15px;background:#111a30}
-header h1{color:#38bdf8;margin:0;font-size:30px}
-header p{color:#b9c5d8}
+body{margin:0;background:#080f1e;color:white;font-family:Arial,sans-serif}
+header{text-align:center;padding:30px 15px;background:#111d35}
+header h1{color:#38bdf8;font-size:32px;margin:0}
+header p{color:#bdc9dc}
 .container{max-width:750px;margin:25px auto;padding:15px}
-.tool{
- background:#151f35;border:1px solid #293750;
- padding:22px;border-radius:15px;margin-bottom:22px;
-}
+.tool{background:#14213a;border:1px solid #293c5c;padding:22px;border-radius:16px;margin-bottom:22px}
 h2{color:#38bdf8;margin-top:0}
-input{
- width:100%;padding:14px;border-radius:8px;
- border:1px solid #43516b;background:#0b1020;
- color:white;margin:12px 0;font-size:15px;
-}
-button{
- width:100%;padding:14px;border:0;border-radius:8px;
- background:#0284c7;color:white;font-size:16px;
- font-weight:bold;cursor:pointer;
-}
+input{width:100%;padding:14px;margin:12px 0;background:#080f1e;border:1px solid #435675;border-radius:9px;color:white;font-size:15px}
+button{width:100%;padding:14px;background:#0284c7;border:0;border-radius:9px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
 button:hover{background:#0369a1}
-.result{margin-top:15px;text-align:center}
-.result img{max-width:100%;border-radius:10px}
-a.download{
- display:inline-block;margin-top:12px;padding:13px 22px;
- background:#16a34a;color:white;text-decoration:none;
- border-radius:8px;font-weight:bold;
-}
-.note{color:#aab7ca;font-size:13px;line-height:1.6}
+video{width:100%;max-height:300px;margin-top:15px;border-radius:10px;background:#000}
+.progress{height:13px;background:#334155;border-radius:20px;overflow:hidden;margin-top:15px}
+.bar{height:100%;width:0;background:#22c55e;transition:width .2s}
+.result{text-align:center;margin-top:15px;overflow-wrap:anywhere}
+.note{font-size:13px;color:#aab8ce;line-height:1.6}
 footer{text-align:center;padding:25px;color:#94a3b8}
 </style>
 </head>
@@ -52,85 +36,143 @@ footer{text-align:center;padding:25px;color:#94a3b8}
 <div class="container">
 
 <section class="tool">
-<h2>YouTube Thumbnail Viewer</h2>
-<p>Paste a YouTube video link:</p>
-<input id="youtube" placeholder="Paste YouTube link here">
-<button onclick="showThumbnail()">View Thumbnail</button>
-<div class="result" id="thumbResult"></div>
+<h2>🎬 MP4 Video Downloader</h2>
+<p>Paste a direct MP4 video link:</p>
+<input id="mp4" type="url" placeholder="Paste MP4 link here">
+<button id="previewBtn" onclick="previewVideo()">Preview Video</button>
+<div id="videoInfo" class="result"></div>
+<video id="player" controls hidden></video>
+<div class="progress" id="progressBox" hidden>
+<div class="bar" id="bar"></div>
+</div>
+<p id="status" class="result"></p>
+<button id="downloadBtn" onclick="downloadVideo()">Download Video</button>
+<p class="note">Download only videos you own or have permission to download. Direct MP4 links are required. Some servers do not allow browser downloads.</p>
 </section>
 
 <section class="tool">
-<h2>MP4 Video Downloader</h2>
-<p>Paste a direct MP4 video link:</p>
-<input id="mp4" type="url" placeholder="https://example.com/video.mp4">
-<button onclick="downloadMP4()">Download MP4</button>
-<div class="result" id="downloadResult"></div>
-<p class="note">
-Only download videos you own or have permission to download.
-The link must be a direct MP4 file. Some websites block direct downloads.
-</p>
+<h2>🖼️ YouTube Thumbnail Viewer</h2>
+<input id="youtube" placeholder="Paste YouTube link here">
+<button onclick="showThumbnail()">View Thumbnail</button>
+<div id="thumbResult" class="result"></div>
 </section>
 
 </div>
 
-<footer>
-© 2026 VideoToolHub | Free Video Tools
-</footer>
+<footer>© 2026 VideoToolHub</footer>
 
 <script>
+let videoURL="";
+
+function previewVideo(){
+ const link=document.getElementById("mp4").value.trim();
+ const info=document.getElementById("videoInfo");
+ const player=document.getElementById("player");
+ info.textContent="";
+ player.hidden=true;
+ try{
+  const u=new URL(link);
+  if(!["https:","http:"].includes(u.protocol) ||
+     !u.pathname.toLowerCase().endsWith(".mp4")){
+   info.textContent="Please enter a direct MP4 link.";
+   return;
+  }
+  videoURL=u.href;
+  player.src=videoURL;
+  player.hidden=false;
+  player.onloadedmetadata=()=>{
+   const duration=Math.floor(player.duration);
+   info.textContent="Video ready • "+(Number.isFinite(duration)?Math.floor(duration/60)+" min "+duration%60+" sec":"Duration unavailable");
+  };
+  player.onerror=()=>{
+   info.textContent="Preview unavailable. The server may block access.";
+  };
+ }catch(e){
+  info.textContent="Please enter a valid link.";
+ }
+}
+
+async function downloadVideo(){
+ const link=document.getElementById("mp4").value.trim();
+ const status=document.getElementById("status");
+ const bar=document.getElementById("bar");
+ const box=document.getElementById("progressBox");
+ const btn=document.getElementById("downloadBtn");
+
+ if(!videoURL || link!==videoURL){
+  previewVideo();
+  if(!videoURL)return;
+ }
+ btn.disabled=true;
+ box.hidden=false;
+ bar.style.width="0%";
+ status.textContent="Starting download...";
+
+ try{
+  const response=await fetch(videoURL);
+  if(!response.ok)throw new Error("Download unavailable");
+  const total=Number(response.headers.get("content-length"))||0;
+  if(!response.body)throw new Error("Progress unavailable");
+
+  const reader=response.body.getReader();
+  const chunks=[];
+  let loaded=0;
+  while(true){
+   const {done,value}=await reader.read();
+   if(done)break;
+   chunks.push(value);
+   loaded+=value.length;
+   if(total){
+    const percent=Math.min(100,Math.round(loaded/total*100));
+    bar.style.width=percent+"%";
+    status.textContent="Downloading: "+percent+"%";
+   }else{
+    status.textContent="Downloading...";
+   }
+  }
+  const blob=new Blob(chunks,{type:"video/mp4"});
+  const objectURL=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=objectURL;
+  a.download="VideoToolHub-video.mp4";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(objectURL),60000);
+  bar.style.width="100%";
+  status.textContent="✅ Download complete!";
+ }catch(e){
+  status.textContent="Direct download blocked by server. Try opening the video and use the browser menu to save it if available.";
+ }finally{
+  btn.disabled=false;
+ }
+}
+
 function getYouTubeID(url){
  try{
   const u=new URL(url);
-  if(u.hostname.includes("youtu.be"))
-   return u.pathname.slice(1).split("/")[0];
+  if(u.hostname.includes("youtu.be"))return u.pathname.slice(1).split("/")[0];
   if(u.hostname.includes("youtube.com")){
    if(u.pathname==="/watch")return u.searchParams.get("v");
-   const parts=u.pathname.split("/");
-   if(["embed","shorts","live"].includes(parts[1]))return parts[2];
+   const p=u.pathname.split("/");
+   if(["embed","shorts","live"].includes(p[1]))return p[2];
   }
  }catch(e){}
  return null;
 }
 
 function showThumbnail(){
- const link=document.getElementById("youtube").value.trim();
- const id=getYouTubeID(link);
+ const id=getYouTubeID(document.getElementById("youtube").value.trim());
  const box=document.getElementById("thumbResult");
- if(!id){
-  box.textContent="Please enter a valid YouTube link.";
-  return;
- }
  box.innerHTML="";
+ if(!id){box.textContent="Please enter a valid YouTube link.";return;}
  const img=document.createElement("img");
  img.src="https://img.youtube.com/vi/"+encodeURIComponent(id)+"/hqdefault.jpg";
- img.alt="YouTube thumbnail";
- img.onerror=()=>box.textContent="Thumbnail could not be loaded.";
+ img.style.width="100%";
+ img.style.borderRadius="10px";
+ img.onerror=()=>box.textContent="Thumbnail unavailable.";
  box.appendChild(img);
 }
-
-function downloadMP4(){
- const link=document.getElementById("mp4").value.trim();
- const box=document.getElementById("downloadResult");
- box.textContent="";
- try{
-  const u=new URL(link);
-  if(!["http:","https:"].includes(u.protocol) ||
-     !u.pathname.toLowerCase().endsWith(".mp4")){
-   box.textContent="Please enter a direct MP4 link.";
-   return;
-  }
-  const a=document.createElement("a");
-  a.href=u.href;
-  a.download="video.mp4";
-  a.textContent="Click here if download does not start";
-  a.className="download";
-  box.appendChild(a);
-  a.click();
- }catch(e){
-  box.textContent="Please enter a valid video link.";
- }
-}
 </script>
-
 </body>
 </html>

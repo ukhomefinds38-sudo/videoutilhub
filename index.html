@@ -318,5 +318,37 @@ function convertDuration() {
     hours + " Hours " + minutes + " Minutes " + remaining + " Seconds";
 }
 </script>
+<section style="padding:25px; margin:25px auto; max-width:600px; background:#182235; border-radius:15px; color:white; text-align:center;">
+  <h2>Video Bitrate Calculator</h2>
+  <p>Calculate approximate video bitrate from file size and duration.</p>
+
+  <input id="videoSizeMB" type="number" placeholder="File size (MB)" value="100">
+  <br><br>
+  <input id="videoDurationMin" type="number" placeholder="Duration (minutes)" value="5">
+  <br><br>
+
+  <button onclick="calculateBitrate()" style="padding:12px 25px; background:#2563eb; color:white; border:0; border-radius:8px;">
+    Calculate Bitrate
+  </button>
+
+  <h3 id="bitrateResult">Bitrate: 2.67 Mbps</h3>
+</section>
+
+<script>
+function calculateBitrate() {
+  const size = Number(document.getElementById("videoSizeMB").value);
+  const duration = Number(document.getElementById("videoDurationMin").value);
+
+  if (!Number.isFinite(size) || !Number.isFinite(duration) || size <= 0 || duration <= 0) {
+    document.getElementById("bitrateResult").textContent = "Enter valid file size and duration.";
+    return;
+  }
+
+  const bitrate = (size * 8) / (duration * 60);
+
+  document.getElementById("bitrateResult").textContent =
+    "Approximate Bitrate: " + bitrate.toFixed(2) + " Mbps";
+}
+</script>
 </body>
 </html>

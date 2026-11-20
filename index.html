@@ -375,5 +375,131 @@ function calculateBitrate() {
   <h3>Contact</h3>
   <p>Thank you for using VideoToolHub!</p>
 </section>
+<section id="video-compressor" style="background:#1b293b;padding:22px;border-radius:14px;margin:25px 0;color:white;">
+  <h2 style="color:#60a5fa;">Free Video Compressor</h2>
+  <p>Reduce your video file size directly in your browser.</p>
+
+  <input type="file" id="vcFile" accept="video/*" style="max-width:100%;margin:12px 0;">
+
+  <label>Video Quality</label>
+  <select id="vcQuality" style="display:block;width:100%;padding:12px;margin:10px 0;">
+    <option value="2500000">High Quality</option>
+    <option value="1200000" selected>Medium Quality</option>
+    <option value="600000">Low Quality - Smaller File</option>
+  </select>
+
+  <label>Resolution</label>
+  <select id="vcResolution" style="display:block;width:100%;padding:12px;margin:10px 0;">
+    <option value="1080">1080p</option>
+    <option value="720" selected>720p</option>
+    <option value="480">480p</option>
+  </select>
+
+  <button id="vcStart" style="background:#2563eb;color:white;padding:12px 20px;border:0;border-radius:8px;margin-top:12px;">
+    Compress Video
+  </button>
+
+  <p id="vcStatus">Choose a video to get started.</p>
+  <a id="vcDownload" style="display:none;color:#60a5fa;font-weight:bold;">Download Compressed Video</a>
+</section>
+
+<script>
+(function(){
+  const fileInput = document.getElementById("vcFile");
+  const startBtn = document.getElementById("vcStart");
+  const status = document.getElementById("vcStatus");
+  const download = document.getElementById("vcDownload");
+
+  startBtn.addEventListener("click", async function(){
+    const file = fileInput.files[0];
+    if(!file){
+      status.textContent = "Please select a video first.";
+      return;
+    }
+
+    if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){
+      status.textContent = "Your browser does not support video compression.";
+      return;
+    }
+
+    startBtn.disabled = true;
+    download.style.display = "none";
+    status.textContent = "Preparing video...";
+
+    const video = document.createElement("video");
+    const url = URL.createObjectURL(file);
+    video.src = url;
+    video.muted = true;
+    video.playsInline = true;
+
+    try{
+      await new Promise((resolve,reject)=>{
+        video.onloadedmetadata = resolve;
+        video.onerror = reject;
+      });
+
+      const maxHeight = Number(document.getElementById("vcResolution").value);
+      const bitrate = Number(document.getElementById("vcQuality").value);
+      const scale = Math.min(1,maxHeight/video.videoHeight);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(video.videoWidth*scale);
+      canvas.height = Math.round(video.videoHeight*scale);
+
+      const ctx = canvas.getContext("2d");
+      const stream = canvas.captureStream(24);
+      const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+        ? "video/webm;codecs=vp9" : "video/webm";
+
+      const recorder = new MediaRecorder(stream,{
+        mimeType:mime,
+        videoBitsPerSecond:bitrate
+      });
+
+      const chunks = [];
+      recorder.ondataavailable = e => {
+        if(e.data.size) chunks.push(e.data);
+      };
+
+      recorder.onstop = ()=>{
+        const output = new Blob(chunks,{type:"video/webm"});
+        const outputURL = URL.createObjectURL(output);
+        download.href = outputURL;
+        download.download = "compressed-video.webm";
+        download.textContent = "Download Compressed Video ("+
+          (output.size/1024/1024).toFixed(2)+" MB)";
+        download.style.display = "block";
+        status.textContent = "Compression finished! Original: "+
+          (file.size/1024/1024).toFixed(2)+" MB | New: "+
+          (output.size/1024/1024).toFixed(2)+" MB";
+        startBtn.disabled = false;
+        URL.revokeObjectURL(url);
+      };
+
+      recorder.onerror = ()=>{
+        status.textContent = "Compression failed. Try another video.";
+        startBtn.disabled = false;
+      };
+
+      video.onended = ()=>recorder.stop();
+      recorder.start();
+
+      await video.play();
+
+      function drawFrame(){
+        if(video.ended || video.paused) return;
+        ctx.drawImage(video,0,0,canvas.width,canvas.height);
+        requestAnimationFrame(drawFrame);
+      }
+      drawFrame();
+
+      status.textContent = "Compressing video... Please wait.";
+    }catch(error){
+      status.textContent = "Could not process this video. Try a smaller file.";
+      startBtn.disabled = false;
+      URL.revokeObjectURL(url);
+    }
+  });
+})();
+</script>
 </body>
 </html>

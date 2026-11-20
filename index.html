@@ -501,5 +501,73 @@ function calculateBitrate() {
   });
 })();
 </script>
+<section id="mp3-converter" style="background:#1b293b;padding:22px;border-radius:14px;margin:25px 0;color:white;">
+  <h2 style="color:#60a5fa;">Free Video to MP3 Converter</h2>
+  <p>Extract audio from your video and download it as MP3.</p>
+
+  <input type="file" id="mp3File" accept="video/*,audio/*" style="max-width:100%;margin:12px 0;">
+
+  <button id="mp3Convert" style="background:#2563eb;color:white;padding:12px 20px;border:0;border-radius:8px;">
+    Convert to MP3
+  </button>
+
+  <p id="mp3Status">Choose a video or audio file.</p>
+  <a id="mp3Download" style="display:none;color:#60a5fa;font-weight:bold;">Download MP3</a>
+</section>
+
+<script type="module">
+import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
+import { toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
+
+const ffmpeg = new FFmpeg();
+const button = document.getElementById("mp3Convert");
+const fileInput = document.getElementById("mp3File");
+const status = document.getElementById("mp3Status");
+const download = document.getElementById("mp3Download");
+let loaded = false;
+
+button.addEventListener("click", async () => {
+  const file = fileInput.files[0];
+  if (!file) {
+    status.textContent = "Please choose a file first.";
+    return;
+  }
+
+  button.disabled = true;
+  download.style.display = "none";
+
+  try {
+    if (!loaded) {
+      status.textContent = "Loading conversion engine. First load may take time...";
+      const base = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm";
+      await ffmpeg.load({
+        coreURL: await toBlobURL(base + "/ffmpeg-core.js", "text/javascript"),
+        wasmURL: await toBlobURL(base + "/ffmpeg-core.wasm", "application/wasm")
+      });
+      loaded = true;
+    }
+
+    status.textContent = "Converting your file to MP3...";
+    await ffmpeg.writeFile("input", new Uint8Array(await file.arrayBuffer()));
+    await ffmpeg.exec(["-i", "input", "-vn", "-codec:a", "libmp3lame", "-q:a", "2", "output.mp3"]);
+
+    const data = await ffmpeg.readFile("output.mp3");
+    const blob = new Blob([data], {type:"audio/mpeg"});
+    const url = URL.createObjectURL(blob);
+
+    download.href = url;
+    download.download = "converted-audio.mp3";
+    download.textContent = "Download MP3";
+    download.style.display = "block";
+    status.textContent = "Conversion complete!";
+    await ffmpeg.deleteFile("input");
+    await ffmpeg.deleteFile("output.mp3");
+  } catch (error) {
+    status.textContent = "Conversion failed. Try a smaller file or another browser.";
+  }
+
+  button.disabled = false;
+});
+</script>
 </body>
 </html>
